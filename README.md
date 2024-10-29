@@ -1,2 +1,2 @@
 # AV2-Grupo_4
-Repositório destinado à avaliação 2
+Com base no tema a ser escolhido, o "README" será alterado.
