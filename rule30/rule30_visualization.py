@@ -1,4 +1,5 @@
-import numpy as np
+from mesa import Model
+from mesa.time import SimultaneousActivation
 from flask import Flask, render_template_string, jsonify
 import matplotlib
 matplotlib.use('Agg')  
@@ -7,30 +8,43 @@ import io
 import base64
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
-class Rule30Model:
+class Rule30Cell:
+    def __init__(self, state):
+        self.state = state
+        self.next_state = 0
+
+    def compute_next_state(self, left, center, right):
+        self.next_state = left ^ (center | right)
+
+    def advance(self):
+        self.state = self.next_state
+
+class Rule30Model(Model):
     def __init__(self, width=128):
         self.width = width
-        self.state = 1 << (width // 2)
+        self.schedule = SimultaneousActivation(self)
+        self.cells = [Rule30Cell(1 if i == width // 2 else 0) for i in range(width)]
         self.steps = []
         self.collect_state()
 
     def step(self):
-        next_state = 0
-        for j in range(self.width):
-            left = (self.state >> (j + 1)) & 1
-            center = (self.state >> j) & 1
-            right = (self.state >> (j - 1)) & 1 if j > 0 else 0
-            next_state |= ((left ^ (center | right)) << j)
-        self.state = next_state
+        for i in range(self.width):
+            left = self.cells[i - 1].state if i > 0 else 0
+            center = self.cells[i].state
+            right = self.cells[i + 1].state if i < self.width - 1 else 0
+            self.cells[i].compute_next_state(left, center, right)
+        self.schedule.step()
+        for cell in self.cells:
+            cell.advance()
         self.collect_state()
 
     def collect_state(self):
-        row = [(self.state >> j) & 1 for j in range(self.width - 1, -1, -1)]
+        row = [cell.state for cell in self.cells]
         self.steps.append(row)
 
 app = Flask(__name__)
-model = Rule30Model(width=128) 
-max_steps = 64  
+model = Rule30Model(width=128)
+max_steps = 64
 step_count = 0
 
 @app.route('/')
