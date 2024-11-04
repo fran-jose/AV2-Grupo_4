@@ -3,23 +3,19 @@ from mesa import Model
 from mesa.datacollection import DataCollector
 from mesa.space import PropertyLayer
 from scipy.signal import convolve2d
-from flask import Flask, render_template_string, jsonify
+from flask import Flask, render_template_string, jsonify, request
 import matplotlib
 matplotlib.use('Agg')  
 import matplotlib.pyplot as plt
-import os
 import io
 import base64
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-import threading
-import time
 
 class GameOfLifeModel(Model):
     def __init__(self, width=10, height=10, alive_fraction=0.2):
         super().__init__()
         self.cell_layer = PropertyLayer("cells", width, height, False, dtype=bool)
         self.cell_layer.data = np.random.choice([True, False], size=(width, height), p=[alive_fraction, 1 - alive_fraction])
-
         self.cells = width * height
         self.alive_count = 0
         self.alive_fraction = 0
@@ -38,7 +34,7 @@ class GameOfLifeModel(Model):
 
         self.cell_layer.data = np.logical_or(
             np.logical_and(self.cell_layer.data, np.logical_or(neighbor_count == 2, neighbor_count == 3)),
-            np.logical_and(~self.cell_layer.data, neighbor_count == 3)  
+            np.logical_and(~self.cell_layer.data, neighbor_count == 3)
         )
 
         self.alive_count = np.sum(self.cell_layer.data)
@@ -78,6 +74,16 @@ def plot_png():
     img.seek(0)
     return base64.b64encode(img.getvalue()).decode('utf8')
 
+@app.route('/start', methods=['POST'])
+def start_new_game():
+    global model, step_count
+    width = int(request.json.get('width', 20))
+    height = int(request.json.get('height', 20))
+    alive_fraction = float(request.json.get('alive_fraction', 30)) / 100.0
+    model = GameOfLifeModel(width=width, height=height, alive_fraction=alive_fraction)
+    step_count = 0
+    return jsonify(success=True)
+
 HTML_TEMPLATE = """
 <!doctype html>
 <html lang="en">
@@ -91,6 +97,11 @@ HTML_TEMPLATE = """
       <h1>Conway's Game of Life</h1>
       <img id="gol-image" src="data:image/png;base64,{{ plot_png }}" alt="Game of Life">
       <br><br>
+      <input type="number" id="width" value="20" min="5" max="100">
+      <input type="number" id="height" value="20" min="5" max="100">
+      <input type="number" id="alive_fraction" value="30" min="0" max="100">
+      <button onclick="startNewGame()">Start New Game</button>
+      <br><br>
       <button onclick="nextStep()">Next Step</button>
     </div>
     <script>
@@ -103,9 +114,34 @@ HTML_TEMPLATE = """
           }
         });
       }
+
       function updateImage() {
         fetch('/plot.png').then(response => response.text()).then(data => {
           document.getElementById('gol-image').src = 'data:image/png;base64,' + data;
+        });
+      }
+
+      function startNewGame() {
+        const width = document.getElementById('width').value;
+        const height = document.getElementById('height').value;
+        const aliveFraction = document.getElementById('alive_fraction').value;
+        
+        fetch('/start', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            width: width,
+            height: height,
+            alive_fraction: aliveFraction
+          })
+        }).then(response => response.json()).then(data => {
+          if (data.success) {
+            updateImage(); // Atualiza a imagem após iniciar o novo jogo
+          } else {
+            alert('Error starting new game');
+          }
         });
       }
     </script>
