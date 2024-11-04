@@ -19,6 +19,7 @@ class HexGameOfLifeModel(Model):
         self.width = width
         self.height = height
         self.grid = np.random.choice([True, False], size=(width, height), p=[alive_fraction, 1 - alive_fraction])
+        self.grid_copy = np.copy(self.grid) #Salvar configuração inicial
         self.cells = width * height
         self.alive_count = 0
         self.alive_fraction = 0
@@ -44,6 +45,13 @@ class HexGameOfLifeModel(Model):
         self.alive_count = np.sum(self.grid)
         self.alive_fraction = self.alive_count / self.cells
         self.datacollector.collect(self)
+    #função reset 
+    def reset(self):
+        self.grid = self.grid_copy 
+        self.alived_count = 0
+        self.alived_fraction = 0
+        self.datacollector.collect(self)
+        
 
     def count_neighbors(self, x, y):
         directions = [
@@ -104,6 +112,13 @@ def plot_png():
     plt.close(fig)
     img.seek(0)
     return base64.b64encode(img.getvalue()).decode('utf8')
+@app.route('/reset')
+#Chamando reset
+def reset():
+    global step_count
+    model.reset()
+    step_count = 0
+    return jsonify(success=True)
 
 HTML_TEMPLATE = """
 <!doctype html>
@@ -119,6 +134,7 @@ HTML_TEMPLATE = """
       <img id="gol-image" src="data:image/png;base64,{{ plot_png }}" alt="Hexagonal Game of Life">
       <br><br>
       <button onclick="nextStep()">Next Step</button>
+      <button onclick="resetModel()">Reset</button>
     </div>
     <script>
       function nextStep() {
@@ -130,6 +146,13 @@ HTML_TEMPLATE = """
           }
         });
       }
+      function resetModel() {
+        fetch('/reset').then(response => response.json()).then(data => {
+          if (data.success) {
+            updateImage(); // Atualiza a imagem após o reset
+          }
+        });
+        }
       function updateImage() {
         fetch('/plot.png').then(response => response.text()).then(data => {
           document.getElementById('gol-image').src = 'data:image/png;base64,' + data;
@@ -139,6 +162,7 @@ HTML_TEMPLATE = """
   </body>
 </html>
 """
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
