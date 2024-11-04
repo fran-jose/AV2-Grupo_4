@@ -16,6 +16,7 @@ class GameOfLifeModel(Model):
         super().__init__()
         self.cell_layer = PropertyLayer("cells", width, height, False, dtype=bool)
         self.cell_layer.data = np.random.choice([True, False], size=(width, height), p=[alive_fraction, 1 - alive_fraction])
+        self.cell_layer_copy = np.copy(self.cell_layer.data) # guardar os dados iniciais
         self.cells = width * height
         self.alive_count = 0
         self.alive_fraction = 0
@@ -37,6 +38,12 @@ class GameOfLifeModel(Model):
             np.logical_and(~self.cell_layer.data, neighbor_count == 3)
         )
 
+        self.alive_count = np.sum(self.cell_layer.data)
+        self.alive_fraction = self.alive_count / self.cells
+        self.datacollector.collect(self)
+    #Função resetar 
+    def reset(self):
+        self.cell_layer.data = self.cell_layer_copy
         self.alive_count = np.sum(self.cell_layer.data)
         self.alive_fraction = self.alive_count / self.cells
         self.datacollector.collect(self)
@@ -83,6 +90,12 @@ def start_new_game():
     model = GameOfLifeModel(width=width, height=height, alive_fraction=alive_fraction)
     step_count = 0
     return jsonify(success=True)
+@app.route('/reset')
+def reset():
+    model.reset()
+    global step_count
+    step_count = 0  
+    return jsonify(success=True)
 
 HTML_TEMPLATE = """
 <!doctype html>
@@ -103,6 +116,7 @@ HTML_TEMPLATE = """
       <button onclick="startNewGame()">Start New Game</button>
       <br><br>
       <button onclick="nextStep()">Next Step</button>
+      <button onclick="reset()">Reset</button>
     </div>
     <script>
       function nextStep() {
@@ -114,6 +128,13 @@ HTML_TEMPLATE = """
           }
         });
       }
+      function reset() {
+        fetch('/reset').then(response => response.json()).then(data => {
+          if (data.success) {
+            updateImage(); // Atualiza a imagem após o reset
+          }
+        });
+        }
 
       function updateImage() {
         fetch('/plot.png').then(response => response.text()).then(data => {
