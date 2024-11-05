@@ -27,9 +27,11 @@ class GameOfLifeModel(Model):
     def step(self):
         # Define a kernel for counting neighbors. The kernel has 1s around the center cell (which is 0).
         # This setup allows us to count the live neighbors of each cell when we apply convolution.
+        """Arthur - Pessoal que for brincar com alterar as regras do jogo, acho que é so mudar
+        esse kernel ou os np.logical_and"""
         kernel = np.array([[1, 1, 1],
                            [1, 0, 1],
-                           [1, 1, 1]])
+                           [1, 1, 1]]) 
 
         # Count neighbors using convolution.
         # convolve2d applies the kernel to each cell of the grid, summing up the values of neighbors.
