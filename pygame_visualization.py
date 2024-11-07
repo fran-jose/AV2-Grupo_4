@@ -8,7 +8,7 @@ import pygame
 def run_GameOfLifeModel(width, height, cell_size, initial_config = None, colors = {"empty" : (0,0,0),
                                                                                    "filled" : (255, 255, 255)}):
     pygame.init()
-    screen = pygame.set_display(width * cell_size, height * cell_size)
+    screen = pygame.display.set_mode((width * cell_size, height * cell_size))
     clock = pygame.time.Clock()
 
     model = GameOfLifeModel(width, height, alive_fraction = 0.2)
@@ -29,7 +29,7 @@ def run_GameOfLifeModel(width, height, cell_size, initial_config = None, colors 
                 running = False
 
         screen.fill((0, 0, 0))
-
+        # Talvez de pra otimizar esses 2 loop for, mas por enquanto vou deixar assim
         for x in range(width):
             for y in range(height):
                 if model.cell_layer.data[x][y]:
@@ -37,6 +37,8 @@ def run_GameOfLifeModel(width, height, cell_size, initial_config = None, colors 
 
         pygame.display.flip()
         model.step()
-        clock.tick(10)  
+        clock.tick(20) # Aqui ajusta o framerate
 
     pygame.quit()
+
+run_GameOfLifeModel(100, 100, 10)
