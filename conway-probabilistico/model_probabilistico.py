@@ -3,20 +3,30 @@ from mesa import Model
 from mesa.datacollection import DataCollector
 from mesa.space import PropertyLayer
 from scipy.signal import convolve2d
+# Usei uma distribuição de probabilidade onde seu acumulado se aproxima cada vez mais devagar de 1 
+from scipy.stats import expon
 
 class GameOfLifeModel(Model):   # Aqui eu adicionei o revive_probabilities e o survive_probabilities
     def __init__(self, width=10, height=10,
-                 revive_probabilities=None, survive_probabilities=None, alive_fraction=0.2):
+                 revive_probabilities=None, survive_probabilities=None, alive_fraction=0.2, lambida = 100):
         super().__init__()
+        # Adicionei o parametro lambida da distibuição de probabilidade
         
         # Initialize the property layer for cell states
         self.cell_layer = PropertyLayer("cells", width, height, False, dtype=bool)
+        # Defino a idade de cada celula
+        self.age_layer = PropertyLayer("ages", width, height, 0, dtype=int)
         self.cell_layer.data = np.random.choice([True, False], size=(width, height), p=[alive_fraction, 1 - alive_fraction])
+
+         
 
         # Caso a probabilidade não seja dada, o padrão que o código vai seguir é o determinístico do jogo de Conway
         self.revive_probabilities = revive_probabilities if revive_probabilities is not None else {3: 1.0}
         self.survive_probabilities = survive_probabilities if survive_probabilities is not None else {2: 1.0, 3: 1.0}
-
+        
+        #Lambida
+        self.lambida = lambida
+        
         # Metrics and datacollector
         self.cells = width * height
         self.alive_count = 0
@@ -42,11 +52,25 @@ class GameOfLifeModel(Model):   # Aqui eu adicionei o revive_probabilities e o s
             for y in range(self.cell_layer.data.shape[1]):
                 alive = self.cell_layer.data[x, y]
                 neighbors = neighbor_count[x, y]
-                
+                idade = self.age_layer.data[x,y]
                 if alive:
                     # Apply survival probability if the cell is alive
                     survival_prob = self.survive_probabilities.get(neighbors, 0)
-                    new_state[x, y] = np.random.rand() < survival_prob
+                    # probablidade de morrre ( Quanto maior o lambida, menor vai ser com o tempo)
+                    morte_prob = expon.cdf(idade, scale = self.lambida)
+                    # Retorna se consegiu ou não sobreviver
+                    viva = np.random.rand() < survival_prob
+                    # Retorna se morreu ou não
+                    morta= np.random.rand() < morte_prob
+                    if viva and not morta:
+                        new_state[x,y] = True
+                    else:
+                        new_state[x,y] = False
+                    # Altera a idade
+                    if not new_state[x,y]:
+                        self.age_layer.data[x,y] = 0
+                    else:
+                        self.age_layer.data[x,y] += 1
                 else:
                     # Apply revival probability if the cell is dead
                     revival_prob = self.revive_probabilities.get(neighbors, 0)
