@@ -13,15 +13,18 @@ def run_GameOfLifeModel(
     cell_size,
     revive_probabilities,
     survival_probabilities,
+    lamb,
+    age_death,
     initial_config=None,
     colors={"empty": (0, 0, 0), "filled": (255, 255, 255)},
+    alive_fraction = 0.2
 ):
     pygame.init()
     screen = pygame.display.set_mode((width * cell_size, height * cell_size))
     clock = pygame.time.Clock()
 
     model = GameOfLifeModel(
-        width, height, revive_probabilities, survival_probabilities, alive_fraction=0.2
+        width, height, revive_probabilities, survival_probabilities, alive_fraction, lamb, age_death
     )
     running = True
 
@@ -55,4 +58,4 @@ def run_GameOfLifeModel(
 """Um exemplo onde todas as regras permanecem, com a exceção de que as vezes uma célula revive sozinha
 É curioso que nesse caso ela pode aparecer perto de uma estrutura estável, fazendo com que esta desestabilize e desapareça
 ou (o que é um pouco menos provável) cresça caóticamente"""
-run_GameOfLifeModel(200, 100, 5, {0: 0.001, 3: 1.0}, {2: 1, 3: 1}, True)
+run_GameOfLifeModel(200, 100, 5, {0: 0.001, 3: 1.0}, {2: 1, 3: 1}, 1000,False)
