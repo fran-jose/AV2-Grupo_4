@@ -7,7 +7,7 @@ from scipy.signal import convolve2d
 
 # fmt: off
 class GameOfLifeModel(Model):
-    def __init__(self, width=10, height=10, alive_fraction=0.2):
+    def __init__(self, width=10, height=10, alive_fraction=0.2, game_type = [[2,3],[3]]):
         super().__init__()
         # Initialize the property layer for cell states
         self.cell_layer = PropertyLayer("cells", width, height, False, dtype=bool)
@@ -23,6 +23,7 @@ class GameOfLifeModel(Model):
                              "Fraction alive": "alive_fraction"}
         )
         self.datacollector.collect(self)
+        self.game_type = game_type # Matriz que determina a regra do jogo 
 
     def step(self):
         # Define a kernel for counting neighbors. The kernel has 1s around the center cell (which is 0).
@@ -42,11 +43,18 @@ class GameOfLifeModel(Model):
         # 1. A live cell with 2 or 3 live neighbors survives, otherwise it dies.
         # 2. A dead cell with exactly 3 live neighbors becomes alive.
         # These rules are implemented using logical operations on the grid.
+        '''Carlos - Neste model, é possível alterar a regra do jogo. O código recebe uma lista com duas listas.
+            A primeira lista, diz com quantos vizinhos uma célula deve ter para continuar viva. E a segunda, diz
+            quantos vizinhos é ncessário para uma célula nascer.
+            O game of life clássico usa o parametro [[2,3],[3]]
+        '''
         self.cell_layer.data = np.logical_or(
-            np.logical_and(self.cell_layer.data, np.logical_or(neighbor_count == 2, neighbor_count == 3)),
+            np.logical_and(self.cell_layer.data, np.isin(neighbor_count,self.game_type[0])),
             # Rule for live cells
-            np.logical_and(~self.cell_layer.data, neighbor_count == 3)  # Rule for dead cells
+            np.logical_and(~self.cell_layer.data, np.isin(neighbor_count,self.game_type[1]))  # Rule for dead cells
         )
+        
+
 
         # Metrics
         self.alive_count = np.sum(self.cell_layer.data)
