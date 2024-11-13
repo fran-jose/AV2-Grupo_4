@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import io
 import base64
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+import random
 
 class Rule30Cell:
     def __init__(self, state):

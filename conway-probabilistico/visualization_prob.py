@@ -42,11 +42,32 @@ def run_GameOfLifeModel(
         for x in range(width):
             for y in range(height):
                 if model.cell_layer.data[x][y]:
-                    pygame.draw.rect(
-                        screen,
-                        (255, 255, 255),
-                        (x * cell_size, y * cell_size, cell_size, cell_size),
-                    )
+                    age = model.age_layer.data[x][y]
+
+                    # Gradualmente mudar a cor de vermelho claro para vermelho escuro
+                    if age > 0:
+                        # A intensidade do vermelho escurece à medida que a idade aumenta
+                        # A cor vai do (255, 100, 100) para (100, 0, 0) conforme a idade aumenta
+                        red_intensity = max(255 - (age * 3), 75)  # Diminuir o vermelho
+                        green_intensity = 75  # Podemos manter o verde constante
+                        blue_intensity = 75  # Podemos manter o azul constante
+
+                        cell_color = (red_intensity, green_intensity, blue_intensity)
+
+                        # Desenha a célula com a cor calculada
+                        pygame.draw.rect(
+                            screen,
+                            cell_color,
+                            (x * cell_size, y * cell_size, cell_size, cell_size)
+                        )
+                    else:
+                        # Célula morta, pode ser desenhada com a cor "empty"
+                        pygame.draw.rect(
+                            screen,
+                            empty_color,
+                            (x * cell_size, y * cell_size, cell_size, cell_size)
+                        )
+                        
 
         pygame.display.flip()
         model.step()
