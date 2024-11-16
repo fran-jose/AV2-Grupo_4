@@ -55,4 +55,4 @@ def run_GameOfLifeModel(
 
 
 # Chamar a função para rodar o modelo
-run_GameOfLifeModel(100, 100, 10)
+run_GameOfLifeModel(120, 70, 10)

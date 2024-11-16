@@ -128,4 +128,4 @@ def run_GameOfLifeModel(
 """Um exemplo onde todas as regras permanecem, com a exceção de que as vezes uma célula revive sozinha
 É curioso que nesse caso ela pode aparecer perto de uma estrutura estável, fazendo com que esta desestabilize e desapareça
 ou (o que é um pouco menos provável) cresça caóticamente"""
-run_GameOfLifeModel(200, 100, 5, {0: 0.001, 3: 1.0}, {2: 1, 3: 1}, 1000,False)
+run_GameOfLifeModel(120, 70, 10, {0: 0.001, 3: 1.0}, {2: 1, 3: 1}, 1000,False)
