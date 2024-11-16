@@ -8,8 +8,6 @@ from scipy.signal import convolve2d
 class GameOfLifeModel(Model):
     def __init__(
         self,
-        revive_probabilities,
-        survival_probabilities,
         width=10,
         height=10,
         alive_fraction=0.2,
