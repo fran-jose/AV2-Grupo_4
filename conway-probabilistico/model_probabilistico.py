@@ -18,8 +18,8 @@ class GameOfLifeModel(
         revive_probabilities=None,
         survive_probabilities=None,
         alive_fraction=0.2,
-        lamb=10,
-        age_death=False,
+        lamb=1000,
+        age_death=True,
     ):
         super().__init__()
         # Adicionei o parametro lambida da distibuição de probabilidade
