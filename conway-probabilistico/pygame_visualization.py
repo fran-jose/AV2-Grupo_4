@@ -74,7 +74,9 @@ def run_GameOfLifeModel(
         '''
         David: Alterei a configuração dessa visualização em dois aspectos:
             -Mudei para rodar de maneira probabilística
-            -Incluí também a morte por idade da célula, que o Carlos havia 
+            -Incluí também a morte por idade da célula, que o Carlos havia implementado, 
+            além disso, para uma visualização mais intuitiva da idade, fiz a cor da célula (vermelha no exemplo),
+            ir gradualmente perdendo sua cor.
         '''        
         for x in range(width):
             for y in range(height):
@@ -123,4 +125,7 @@ def run_GameOfLifeModel(
 
     pygame.quit()
 
+"""Um exemplo onde todas as regras permanecem, com a exceção de que as vezes uma célula revive sozinha
+É curioso que nesse caso ela pode aparecer perto de uma estrutura estável, fazendo com que esta desestabilize e desapareça
+ou (o que é um pouco menos provável) cresça caóticamente"""
 run_GameOfLifeModel(200, 100, 5, {0: 0.001, 3: 1.0}, {2: 1, 3: 1}, 1000,False)
