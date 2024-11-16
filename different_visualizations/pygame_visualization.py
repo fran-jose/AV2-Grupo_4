@@ -35,7 +35,9 @@ def run_GameOfLifeModel(width, height, cell_size, tick = 20, initial_config=None
                     dragging = True
                     grid_x = mouse_x // cell_size
                     grid_y = mouse_y // cell_size
-                    model.cell_layer.data[grid_x, grid_y] = not model.cell_layer.data[grid_x, grid_y]
+                    if 0 <= grid_x and grid_x < width and 0 <= grid_y and grid_y < height:
+                        model.cell_layer.data[grid_x, grid_y] = not model.cell_layer.data[grid_x, grid_y]
+                
 
             elif event.type == pygame.MOUSEBUTTONUP: 
                 dragging = False  
@@ -50,8 +52,8 @@ def run_GameOfLifeModel(width, height, cell_size, tick = 20, initial_config=None
             mouse_x, mouse_y = pygame.mouse.get_pos()
             grid_x = mouse_x // cell_size
             grid_y = mouse_y // cell_size
-            model.cell_layer.data[grid_x, grid_y] = not model.cell_layer.data[grid_x, grid_y]
-            print(f"Cell toggled at ({grid_x}, {grid_y})") 
+            if 0 <= grid_x and grid_x < width and 0 <= grid_y and grid_y < height:
+                model.cell_layer.data[grid_x, grid_y] = not model.cell_layer.data[grid_x, grid_y]
 
         screen.fill((0, 0, 0))
 
