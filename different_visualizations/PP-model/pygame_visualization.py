@@ -1,5 +1,6 @@
 from pp_model import GameOfLifeModel
 import pygame
+import matplotlib.pyplot as plt
 
 
 def run_GameOfLifeModel(
@@ -25,6 +26,11 @@ def run_GameOfLifeModel(
 
     # Definir a área do botão RESET (na parte inferior esquerda)
     reset_button_rect = pygame.Rect(10, height * cell_size - 40, 100, 30)
+        # Listas para armazenar os dados de presas e predadores
+    prey_counts = []
+    predator_counts = []
+    time_steps = []
+    time_step = 0
 
     # Barra de controle de velocidade
     slider_rect = pygame.Rect(10, height * cell_size + 50, 200, 20)  # Caixa do slider
@@ -80,6 +86,14 @@ def run_GameOfLifeModel(
         if not paused:
             model.step()
 
+        prey_count = sum(1 for x in range(width) for y in range(height) if model.cell_layer.data[x][y] == 1)
+        predator_count = sum(1 for x in range(width) for y in range(height) if model.cell_layer.data[x][y] == 2)
+        # Armazenar os dados
+        prey_counts.append(prey_count)
+        predator_counts.append(predator_count)
+        time_steps.append(time_step)
+        time_step += 1
+
         screen.fill(empty_color)  # Limpar tela
 
         # Desenho das células
@@ -105,6 +119,17 @@ def run_GameOfLifeModel(
 
     pygame.quit()
 
+    pygame.quit()
+    # Plotando o gráfico
+    plt.figure(figsize=(10, 6))
+    plt.plot(time_steps, prey_counts, label="Presas", color="green")
+    plt.plot(time_steps, predator_counts, label="Predadores", color="red")
+    plt.xlabel("Tempo (Passos)")
+    plt.ylabel("Quantidade")
+    plt.title("Dinâmica Predador-Prey ao Longo do Tempo")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
 
 # Chamar a função para rodar o modelo
 run_GameOfLifeModel(120, 70, 10)
