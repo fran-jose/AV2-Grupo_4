@@ -1,13 +1,3 @@
-"""
-Emilio, coma nossas cus
-
-Hashimoto goze em nossos cus
-
-Peraso, entre e nossas casas e coma nossas mulheres
-
-Pelo poderes de gay que nós somos, esse código funcionaráaaaaaaaaááááa
-"""
-
 import pygame
 from model_probabilistico import GameOfLifeModel
 import numpy as np
@@ -26,7 +16,7 @@ def run_GameOfLifeModel(
     tick=20 
 ):
     pygame.init()
-    screen = pygame.display.set_mode((width * cell_size, height * cell_size + 100))  # Mais espaço para os botões e barra de velocidade (do pal do hashimoto)
+    screen = pygame.display.set_mode((width * cell_size, height * cell_size + 100))  # Mais espaço para os botões e barra de velocidade
     clock = pygame.time.Clock()
 
     model = GameOfLifeModel(
@@ -49,7 +39,7 @@ def run_GameOfLifeModel(
 
     max_age = 0 # Variável q da a buceta da idade maxima
 
-    # Barra deslizante para controle da velocidade (do pal do emilio raspando no meu cu)
+    # Barra deslizante para controle da velocidade
     slider_rect = pygame.Rect(10, height * cell_size + 50, 200, 20)  # Barra de controle
     slider_pos = 200 - 9  # Posição inicial para velocidade de 20
     dragging_slider = False  # Variável para detectar o arraste do slider
@@ -93,7 +83,7 @@ def run_GameOfLifeModel(
         # Atualiza a velocidade com base na posição do slider
         speed = 200 - slider_pos  # Quanto mais à direita, mais lento
         
-        # Se a velocidade for 0, pausa o jogo (e o emilio comerá seu cu hoje a noite)
+        # Se a velocidade for 0, pausa o jogo
         if speed == 0:
             paused = True
 
@@ -101,7 +91,7 @@ def run_GameOfLifeModel(
 
         screen.fill((0, 0, 0)) 
 
-        # Renderizando as células com transição de cor suave (para que emilio coma seu cu suavemente)
+        # Renderizando as células com transição de cor suave
         for x in range(width):
             for y in range(height):
                 if model.cell_layer.data[x][y]:  
@@ -160,7 +150,7 @@ def run_GameOfLifeModel(
         pause_surface = pause_font.render(pause_text, True, pause_color)
         screen.blit(pause_surface, (width * cell_size - 120, height * cell_size + 10))
 
-        # Exibindo o número de células vivas, a fração e a idade máxima (para que seu cu seja comido pelo emilio)
+        # Exibindo o número de células vivas, a fração e a idade máxima
         if model.alive_count > 0:
             average_age = np.mean(model.age_layer.data[model.cell_layer.data])
             if np.max(model.age_layer.data[model.cell_layer.data]) > max_age:
