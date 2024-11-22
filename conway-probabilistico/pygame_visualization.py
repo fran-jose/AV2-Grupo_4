@@ -152,10 +152,13 @@ def run_GameOfLifeModel(
 
         # Exibindo o número de células vivas, a fração e a idade máxima
         if model.alive_count > 0:
-            average_age = np.mean(model.age_layer.data[model.cell_layer.data])
-            if np.max(model.age_layer.data[model.cell_layer.data]) > max_age:
-                max_age = np.max(model.age_layer.data[model.cell_layer.data])
-
+            try:
+                average_age = np.mean(model.age_layer.data[model.cell_layer.data])
+                if np.max(model.age_layer.data[model.cell_layer.data]) > max_age:
+                    max_age = np.max(model.age_layer.data[model.cell_layer.data])
+            except:
+                pass
+        
         else:
             average_age = 0
             max_age = 0
