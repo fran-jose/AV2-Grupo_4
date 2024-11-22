@@ -49,10 +49,7 @@ def run_GameOfLifeModel(
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_x, mouse_y = pygame.mouse.get_pos()
                 if clear_button_rect.collidepoint(mouse_x, mouse_y):
-                    if paused:  # Gera um padrão aleatório apenas se estiver pausado
-                        model.cell_layer.data = np.random.rand(width, height) < 0.2  # 20% de células vivas aleatórias
-                    else:
-                        model.cell_layer.data = np.zeros((width, height), dtype=bool)
+                    model.cell_layer.data = np.zeros((width, height), dtype=bool)  
                 elif slider_rect.collidepoint(mouse_x, mouse_y):  # Interação com a barra deslizante
                     slider_pos = max(0, min(200, mouse_x - slider_rect.x))  # Limita o valor do slider
                     dragging_slider = True
@@ -117,8 +114,8 @@ def run_GameOfLifeModel(
             pygame.draw.rect(screen, button_color, clear_button_rect)
 
         font = pygame.font.SysFont(None, 24)
-        text = font.render("Clear/Random", True, (0, 0, 0))
-        screen.blit(text, (clear_button_rect.x + 10, clear_button_rect.y + 5))
+        text = font.render("Clear", True, (0, 0, 0))
+        screen.blit(text, (clear_button_rect.x + 25, clear_button_rect.y + 5))
 
         # Exibe a barra deslizante
         pygame.draw.rect(screen, (255, 255, 255), slider_rect, 2)  # Caixa do slider
@@ -140,14 +137,6 @@ def run_GameOfLifeModel(
         alive_count_text = font.render(f"Vivas: {model.alive_count}", True, (255, 255, 255))
         screen.blit(alive_count_text, (10, 10))
 
-        # Exibindo a idade média das células vivas
-        if model.alive_count > 0:
-            average_age = np.mean(model.age_layer.data[model.cell_layer.data])
-        else:
-            average_age = 0
-        avg_age_text = font.render(f"Idade Média: {average_age:.2f}", True, (255, 255, 255))
-        screen.blit(avg_age_text, (10, 30))
-
         pygame.display.flip()
 
         if not paused:
@@ -155,4 +144,7 @@ def run_GameOfLifeModel(
 
     pygame.quit()
 
+"""Um exemplo onde todas as regras permanecem, com a exceção de que as vezes uma célula revive sozinha
+É curioso que nesse caso ela pode aparecer perto de uma estrutura estável, fazendo com que esta desestabilize e desapareça
+ou (o que é um pouco menos provável) cresça caoticamente"""
 run_GameOfLifeModel(120, 70, 10, {0: 0.001, 3: 1.0}, {2: 1, 3: 1}, 1000, False)
