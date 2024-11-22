@@ -63,7 +63,7 @@ class GameOfLifeModel(Model):
         # Regra para as presas:
         # 1. As presas sobrevivem se tiverem 2 ou 3 vizinhos do tipo "presa"
         # 2. As presas nascem se tiverem exatamente 3 vizinhos do tipo "presa"
-        new_state = np.where(
+        '''new_state = np.where(
             np.logical_or(
                 np.logical_and(
                     self.cell_layer.data == 1,
@@ -83,7 +83,30 @@ class GameOfLifeModel(Model):
         # Predadores morrem se não tiverem presas ao lado
         new_state[(self.cell_layer.data == 2) & (vizinhos_presas == 0)] = (
             0  # Predadores morrem se não houver presas
-        )
+        )'''
+        #Criação de um nomo modelo, as presas e os predadores se movem
+        predador_positions = np.argwhere(self.cell_layer.data == 2) # Pegar todos os que são predadores
+        presa_positions = np.argwhere(self.cell_layer.data == 1) # Pegar todos que são presas
+        for pos in predador_positions:
+            x, y = pos
+            
+            # O nosso modelo em um modelo sem bordas, podemos então não nos preucupar com o tamanho da matriz
+            dx, dy = np.random.choice([-1, 0, 1], size=2)
+            new_x, new_y = (x + dx) % self.cell_layer.width, (y + dy) % self.cell_layer.height
+
+            if new_state[new_x, new_y] == 0:
+                new_state[new_x, new_y] = 2
+                new_state[x, y] = 0
+        for pos in presa_positions:#movimento da presa
+            x, y = pos
+            dx, dy = np.random.choice([-1, 0, 1], size=2)
+            new_x, new_y = (x + dx) % self.cell_layer.width, (y + dy) % self.cell_layer.height
+
+            if new_state[new_x, new_y] == 0:
+                new_state[new_x, new_y] = 1
+                new_state[x, y] = 0
+
+        self.cell_layer.data = new_state
         # Atualiza o estado da camada de células
         self.cell_layer.data = new_state
         # Atualiza as métricas de presas e predadores
