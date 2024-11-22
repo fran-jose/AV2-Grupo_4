@@ -8,7 +8,7 @@ def run_GameOfLifeModel(
     height,
     cell_size,
     initial_config=None,
-    colors={"empty": (0, 0, 0), "prey": (0, 255, 0), "predator": (255, 0, 0)},
+    colors={"empty": (0, 255, 0), "prey": (255, 255, 0), "predator": (255, 0, 0)},
 ):
     pygame.init()
     screen = pygame.display.set_mode((width * cell_size, height * cell_size + 100))  # Adicionando espaço para o controle de velocidade
