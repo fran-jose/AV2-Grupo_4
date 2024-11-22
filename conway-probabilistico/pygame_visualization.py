@@ -49,7 +49,7 @@ def run_GameOfLifeModel(
             if event.type == pygame.QUIT:
                 running = False
 
-            # Eventos com o mouse (enfiar o mouse no cu e gritar)
+            # Eventos com o mouse
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_x, mouse_y = pygame.mouse.get_pos()
                 if clear_button_rect.collidepoint(mouse_x, mouse_y):
