@@ -37,7 +37,7 @@ def run_GameOfLifeModel(
     clear_button_rect = pygame.Rect(10, height * cell_size + 10, 100, 30)
     random_button_rect = pygame.Rect(120, height * cell_size + 10, 100, 30)
 
-    max_age = 0 # Variável q da a buceta da idade maxima
+    max_age = 0 # Variável q da a poa da idade maxima
 
     # Barra deslizante para controle da velocidade
     slider_rect = pygame.Rect(10, height * cell_size + 50, 200, 20)  # Barra de controle
