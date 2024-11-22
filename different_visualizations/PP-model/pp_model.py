@@ -10,9 +10,9 @@ class GameOfLifeModel(Model):
         height=10,
         alive_fraction=0.2,
 #        game_type=[[2,3], [3]],
-        game_type=[[0], [2]],
-        probabilidade_presa=0.5,
-        probabilidade_predador=0.01,
+        game_type=[[0], []],
+        probabilidade_presa=0.05,
+        probabilidade_predador=0.001,
     ):
         super().__init__()
         # Initialize the property layer for cell states
@@ -58,34 +58,34 @@ class GameOfLifeModel(Model):
         vizinhos_predadores = convolve2d(
             self.cell_layer.data == 2, kernel, mode="same", boundary="wrap"
         )
-        # Cria uma cópia do estado atual para evitar alterações durante a iteração
-        new_state = np.copy(self.cell_layer.data)
-        # Regra para as presas:
-        # 1. As presas sobrevivem se tiverem 2 ou 3 vizinhos do tipo "presa"
-        # 2. As presas nascem se tiverem exatamente 3 vizinhos do tipo "presa"
-        new_state = np.where(
-            np.logical_or(
-                np.logical_and(
-                    self.cell_layer.data == 1,
-                    np.isin(vizinhos_presas, self.game_type[0]),
-                ),
-                np.logical_and(
-                    self.cell_layer.data == 0,
-                    np.isin(vizinhos_presas, self.game_type[1]),
-                ),
-            ),
-            1,
-            0,
-        )
-        new_state[(self.cell_layer.data == 1) & (vizinhos_predadores > 0)] = (
-            2  # Predadores sobrevivem e convertem presas em predadores
-        )
-        # Predadores morrem se não tiverem presas ao lado
-        new_state[(self.cell_layer.data == 2) & (vizinhos_presas == 0)] = (
-            0  # Predadores morrem se não houver presas
-        )
-        # Atualiza o estado da camada de células
+        
+        new_state =self.cell_layer.data.copy()
+        predador_positions = np.argwhere(self.cell_layer.data == 2) # Pegar todos os que são predadores
+        presa_positions = np.argwhere(self.cell_layer.data == 1) # Pegar todos que são presas
+
+        for pos in predador_positions:
+            x, y = pos
+            
+            # O nosso modelo em um modelo sem bordas, podemos então não nos preucupar com o tamanho da matriz
+            dx, dy = np.random.choice([-1, 0, 1], size=2)
+            new_x, new_y = (x + dx) % self.cell_layer.width, (y + dy) % self.cell_layer.height
+
+            if new_state[new_x, new_y] == 0:
+                new_state[new_x, new_y] = 2
+                new_state[x, y] = 0
+        for pos in presa_positions:
+            x, y = pos
+            dx, dy = np.random.choice([-1, 0, 1], size=2)
+            new_x, new_y = (x + dx) % self.cell_layer.width, (y + dy) % self.cell_layer.height
+
+            if new_state[new_x, new_y] == 0:
+                new_state[new_x, new_y] = 1
+                new_state[x, y] = 0
+
         self.cell_layer.data = new_state
+
+
+        
         # Atualiza as métricas de presas e predadores
         self.presas_count = np.sum(self.cell_layer.data == 1)
         self.preadores_count = np.sum(self.cell_layer.data == 2)
