@@ -9,7 +9,7 @@ def run_GameOfLifeModel(
     cell_size,
     lamb,
     initial_config=None,
-    colors={"empty": (0, 0, 0), "prey": (0, 255, 0), "predator": (255, 0, 0)},
+    colors={"empty": (0, 255, 0), "prey": (255, 255, 0), "predator": (255, 0, 0)},
 ):
     pygame.init()
     screen = pygame.display.set_mode((width * cell_size, height * cell_size + 100))  # Adicionando espaço para o controle de velocidade
@@ -28,7 +28,9 @@ def run_GameOfLifeModel(
 
     # Definir a área do botão RESET (na parte inferior esquerda)
     reset_button_rect = pygame.Rect(10, height * cell_size - 40, 100, 30)
+
     # Listas para armazenar os dados de presas e predadores
+
     prey_counts = []
     predator_counts = []
     time_steps = []
@@ -97,7 +99,9 @@ def run_GameOfLifeModel(
         time_steps.append(time_step)
         time_step += 1
 
+
         screen.fill(empty_color)  # Limpar tela com fundo preto
+
 
         # Desenho das células
         for x in range(width):
@@ -133,6 +137,7 @@ def run_GameOfLifeModel(
         clock.tick(speed)  # Ajusta a velocidade com base no slider (quanto maior o valor de speed, mais rápido será)
 
     pygame.quit()  # Finaliza o pygame
+
 
     # Plotando o gráfico
     plt.figure(figsize=(10, 6))

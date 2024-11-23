@@ -3,6 +3,7 @@ from mesa import Model
 from mesa.datacollection import DataCollector
 from mesa.space import PropertyLayer
 from scipy.signal import convolve2d
+
 from scipy.stats import expon
 class GameOfLifeModel(Model):
     def __init__(
@@ -15,11 +16,13 @@ class GameOfLifeModel(Model):
         game_type=[[0], [2]],
         probabilidade_presa=0.05,
         probabilidade_predador=0.1,
+
     ):
         super().__init__()
         # Initialize the property layer for cell states
         # [0->Vazio, 1->Presa, 2->Predador]
         self.cell_layer = PropertyLayer("cells", width, height, 0, dtype=int)
+
         self.time_no_eat = PropertyLayer("time", width, height, 0, dtype=int )
         # Parametro lambda da distribuição exponencial
         self.lamb = lamb
@@ -89,7 +92,7 @@ class GameOfLifeModel(Model):
         new_state[(self.cell_layer.data == 2) & (vizinhos_presas == 0)] = (
             0  # Predadores morrem se não houver presas
         )'''
-        
+
         #Criação de um nomo modelo, as presas e os predadores se movem
         predador_positions = np.argwhere(self.cell_layer.data == 2) # Pegar todos os que são predadores
         presa_positions = np.argwhere(self.cell_layer.data == 1) # Pegar todos que são presas
