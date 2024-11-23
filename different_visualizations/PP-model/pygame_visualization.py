@@ -83,7 +83,8 @@ def run_GameOfLifeModel(
 
         # Atualizar a velocidade com base no slider
         speed_factor = slider_pos / 200  # Ajusta a velocidade com base na posição do slider (0 a 1)
-        speed = base_speed * (1 / (speed_factor + 0.1))  # Maior o fator, mais lenta a simulação
+        speed = base_speed * (speed_factor + 0.3)
+
 
         if not paused:
             model.step()
@@ -123,7 +124,7 @@ def run_GameOfLifeModel(
         screen.blit(prey_text, (1000, 710))  # Exibindo o contador de presas 
         screen.blit(predator_text, (1000, 740))  # Exibindo o contador de predadores logo abaixo
 
-        # Adicionando a palavra 'rate' acima do slider
+        # Adicionando a palavra 'Velocidade' acima do slider
         rate_font = pygame.font.SysFont("Arial", 20)
         rate_text = rate_font.render("Velocidade:", True, (255, 255, 255))  # Cor branca para o texto
         screen.blit(rate_text, (slider_rect.x + (slider_rect.width // 2) - rate_text.get_width() // 2, slider_rect.y - 30))
