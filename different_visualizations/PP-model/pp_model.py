@@ -3,21 +3,29 @@ from mesa import Model
 from mesa.datacollection import DataCollector
 from mesa.space import PropertyLayer
 from scipy.signal import convolve2d
+
+from scipy.stats import expon
 class GameOfLifeModel(Model):
     def __init__(
         self,
+        lamb,
         width=10,
         height=10,
         alive_fraction=0.2,
-#        game_type=[[2,3], [3]],
+#       game_type=[[2,3], [3]],
         game_type=[[0], [2]],
-        probabilidade_presa=0.5,
-        probabilidade_predador=0.01,
+        probabilidade_presa=0.05,
+        probabilidade_predador=0.1,
+
     ):
         super().__init__()
         # Initialize the property layer for cell states
         # [0->Vazio, 1->Presa, 2->Predador]
         self.cell_layer = PropertyLayer("cells", width, height, 0, dtype=int)
+
+        self.time_no_eat = PropertyLayer("time", width, height, 0, dtype=int )
+        # Parametro lambda da distribuição exponencial
+        self.lamb = lamb
         # Randomly set cells to alive
         # Vamos determinar o número de presas e predador
         presa_inicializacao = np.random.choice(
@@ -84,6 +92,7 @@ class GameOfLifeModel(Model):
         new_state[(self.cell_layer.data == 2) & (vizinhos_presas == 0)] = (
             0  # Predadores morrem se não houver presas
         )'''
+
         #Criação de um nomo modelo, as presas e os predadores se movem
         predador_positions = np.argwhere(self.cell_layer.data == 2) # Pegar todos os que são predadores
         presa_positions = np.argwhere(self.cell_layer.data == 1) # Pegar todos que são presas
@@ -93,10 +102,18 @@ class GameOfLifeModel(Model):
             # O nosso modelo em um modelo sem bordas, podemos então não nos preucupar com o tamanho da matriz
             dx, dy = np.random.choice([-1, 0, 1], size=2)
             new_x, new_y = (x + dx) % self.cell_layer.width, (y + dy) % self.cell_layer.height
-
+            
             if new_state[new_x, new_y] == 0:
                 new_state[new_x, new_y] = 2
+                self.time_no_eat.data[new_x, new_y] = self.time_no_eat.data[x,y]+1
                 new_state[x, y] = 0
+                self.time_no_eat.data[x,y] = 0
+            # Uso de uma distribuição de probabilidade exponencial que almenta a probabilidade de uma célula morrer caso não coma
+            morte_prob = expon.cdf(self.time_no_eat.data[new_x, new_y], scale= self.lamb)
+            morta = np.random.rand() < morte_prob
+            if morta:
+                new_state[new_x, new_y] = 0
+            
         for pos in presa_positions:#movimento da presa
             x, y = pos
             dx, dy = np.random.choice([-1, 0, 1], size=2)

@@ -7,6 +7,7 @@ def run_GameOfLifeModel(
     width,
     height,
     cell_size,
+    lamb,
     initial_config=None,
     colors={"empty": (0, 255, 0), "prey": (255, 255, 0), "predator": (255, 0, 0)},
 ):
@@ -14,19 +15,22 @@ def run_GameOfLifeModel(
     screen = pygame.display.set_mode((width * cell_size, height * cell_size + 100))  # Adicionando espaço para o controle de velocidade
     clock = pygame.time.Clock()
 
-    model = GameOfLifeModel(width, height, alive_fraction=0.2)
+    # Corrigindo a criação do modelo para garantir que lamb seja utilizado corretamente
+    model = GameOfLifeModel(lamb,width, height, alive_fraction=0.2)
     running = True
     paused = False  # Para controlar a pausa do jogo
     last_click_time = 0  # Para controlar o clique duplo
 
-    # Cores para cada tipo de célula
-    empty_color = colors["empty"]
+    # Alterando a cor de fundo para preto
+    empty_color = (0, 0, 0)  # Cor preta para o fundo
     prey_color = colors["prey"]  # Cor para presas
     predator_color = colors["predator"]  # Cor para predadores
 
     # Definir a área do botão RESET (na parte inferior esquerda)
     reset_button_rect = pygame.Rect(10, height * cell_size - 40, 100, 30)
-        # Listas para armazenar os dados de presas e predadores
+
+    # Listas para armazenar os dados de presas e predadores
+
     prey_counts = []
     predator_counts = []
     time_steps = []
@@ -58,7 +62,7 @@ def run_GameOfLifeModel(
 
                 # Clique no botão RESET
                 if reset_button_rect.collidepoint(mouse_x, mouse_y):
-                    model = GameOfLifeModel(width, height, alive_fraction=0.2)
+                    model = GameOfLifeModel(lamb,width, height, alive_fraction=0.2)  # Reiniciar o modelo
                 elif slider_rect.collidepoint(mouse_x, mouse_y):
                     slider_pos = max(0, min(200, mouse_x - slider_rect.x))
                     dragging_slider = True
@@ -81,7 +85,8 @@ def run_GameOfLifeModel(
 
         # Atualizar a velocidade com base no slider
         speed_factor = slider_pos / 200  # Ajusta a velocidade com base na posição do slider (0 a 1)
-        speed = base_speed * (1 / (speed_factor + 0.1))  # Maior o fator, mais lenta a simulação
+        speed = base_speed * (speed_factor + 0.3)
+
 
         if not paused:
             model.step()
@@ -94,7 +99,9 @@ def run_GameOfLifeModel(
         time_steps.append(time_step)
         time_step += 1
 
-        screen.fill(empty_color)  # Limpar tela
+
+        screen.fill(empty_color)  # Limpar tela com fundo preto
+
 
         # Desenho das células
         for x in range(width):
@@ -104,7 +111,7 @@ def run_GameOfLifeModel(
                 elif model.cell_layer.data[x][y] == 2:
                     pygame.draw.rect(screen, predator_color, (x * cell_size, y * cell_size, cell_size, cell_size))
 
-        # Desenhando a barra deslizante (slider)
+        # Desenhando a barra deslizante (sl10)ider)
         pygame.draw.rect(screen, (255, 255, 255), slider_rect, 2)  # Caixa do slider
         pygame.draw.circle(screen, (255, 0, 0), (slider_rect.x + slider_pos, slider_rect.centery), 10)
 
@@ -114,12 +121,24 @@ def run_GameOfLifeModel(
         text = font.render("RESET", True, (0, 0, 0))
         screen.blit(text, (reset_button_rect.x + 20, reset_button_rect.y + 5))
 
+        # Exibindo o contador de presas e predadores
+        counter_font = pygame.font.SysFont("Arial", 24)
+        prey_text = counter_font.render(f"Presas: {prey_count}", True, (0, 255, 0))  # Cor verde para presas
+        predator_text = counter_font.render(f"Predadores: {predator_count}", True, (255, 0, 0))  # Cor vermelha para predadores
+        screen.blit(prey_text, (1000, 710))  # Exibindo o contador de presas 
+        screen.blit(predator_text, (1000, 740))  # Exibindo o contador de predadores logo abaixo
+
+        # Adicionando a palavra 'Velocidade' acima do slider
+        rate_font = pygame.font.SysFont("Arial", 20)
+        rate_text = rate_font.render("Velocidade:", True, (255, 255, 255))  # Cor branca para o texto
+        screen.blit(rate_text, (slider_rect.x + (slider_rect.width // 2) - rate_text.get_width() // 2, slider_rect.y - 30))
+
         pygame.display.flip()  # Atualizar a tela
         clock.tick(speed)  # Ajusta a velocidade com base no slider (quanto maior o valor de speed, mais rápido será)
 
-    pygame.quit()
+    pygame.quit()  # Finaliza o pygame
 
-    pygame.quit()
+
     # Plotando o gráfico
     plt.figure(figsize=(10, 6))
     plt.plot(time_steps, prey_counts, label="Presas", color="green")
@@ -132,4 +151,4 @@ def run_GameOfLifeModel(
     plt.show()
 
 # Chamar a função para rodar o modelo
-run_GameOfLifeModel(120, 70, 10)
+run_GameOfLifeModel(120, 70, 10,10)
