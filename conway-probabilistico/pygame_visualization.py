@@ -1,6 +1,7 @@
 import pygame
 from model_probabilistico import GameOfLifeModel # Modelo do jogo
 import numpy as np
+import math
 
 def run_GameOfLifeModel(
     cell_size,
@@ -60,22 +61,23 @@ def run_GameOfLifeModel(
     
     def setup_buttons(cell_size, height):
         """
-        Configura os botões Clear e Random.
+        Configura os botões Clear, Random e Exit.
         """
         clear_button_rect = pygame.Rect(10, height * cell_size + 10, 100, 30)
         random_button_rect = pygame.Rect(120, height * cell_size + 10, 100, 30)
-        return clear_button_rect, random_button_rect
+        exit_button_rect = pygame.Rect(230, height * cell_size + 10, 100, 30)  # Novo botão "Exit"
+        return clear_button_rect, random_button_rect, exit_button_rect
     
     def setup_slider(cell_size, height):
         """
         Configura o slider para controle da velocidade.
         """
         slider_rect = pygame.Rect(10, height * cell_size + 50, 200, 20)
-        slider_pos = 200 - 9  # Posição inicial para velocidade de 20
+        slider_pos = 1  # Posição inicial para velocidade de 1
         return slider_rect, slider_pos
     
     def handle_events(
-        model, width, height, cell_size, clear_button_rect, random_button_rect,
+        model, width, height, cell_size, clear_button_rect, random_button_rect, exit_button_rect,
         slider_rect, paused, dragging_slider, slider_pos
     ):
         """
@@ -98,6 +100,10 @@ def run_GameOfLifeModel(
                 # Botão Random
                 elif random_button_rect.collidepoint(mouse_x, mouse_y):
                     model.cell_layer.data = np.random.rand(width, height) < 0.2
+
+                # Botão Exit
+                elif exit_button_rect.collidepoint(mouse_x, mouse_y):  # Lógica para sair
+                    running = False
 
                 # Slider
                 elif slider_rect.collidepoint(mouse_x, mouse_y):
@@ -130,17 +136,24 @@ def run_GameOfLifeModel(
         """
         Atualiza o estado do modelo e controla a velocidade.
         """
-        # Atualiza a velocidade com base na posição do slider
-        speed = 200 - slider_pos  # Quanto mais à direita, mais lento
-            
-        # Se a velocidade for 0, pausa o jogo
+        # Inverte o slider para que o valor maior esteja à direita
+        slider_value = slider_pos / 200
+        
+        # Velocidade
+        speed = (50 * slider_value)
+        if speed < 0.1:
+            speed = 0
+        else:
+            speed = math.ceil((50 * slider_value ** 1.1))
+        
+        # Pausa o jogo 
         if speed == 0:
             paused = True
 
-        clock.tick(speed)
+        clock.tick(speed)  # Controla o clock de acordo com a velocidade ajustada
 
-        return paused
-    
+        return speed, paused
+        
     def draw_cells(screen, model, cell_size, width, height, empty_color):
         """
         Renderiza as células com base no estado do modelo.
@@ -181,20 +194,21 @@ def run_GameOfLifeModel(
         screen.fill((0, 0, 0))  # Limpa a tela
         draw_cells(screen, model, cell_size, width, height, empty_color)
 
-    def render_buttons(screen, font, mouse_pos, clear_button_rect, random_button_rect, button_color, button_hover_color):
+    def render_buttons(screen, font, mouse_pos, clear_button_rect, random_button_rect, exit_button_rect, button_color, button_hover_color):
         """
         Renderiza os botões na tela.
         """
         draw_button(screen, clear_button_rect, "Clear", font, mouse_pos, button_color, button_hover_color)
         draw_button(screen, random_button_rect, "Random", font, mouse_pos, button_color, button_hover_color) 
+        draw_button(screen, exit_button_rect, "Exit", font, mouse_pos, button_color, button_hover_color) 
 
-    def render_slider(screen, font, slider_rect, slider_pos):
+    def render_slider(screen, font, slider_rect, slider_pos, speed):
         """
         Renderiza o controle do slider e exibe a velocidade atual.
         """
         pygame.draw.rect(screen, (255, 255, 255), slider_rect, 2)  # Caixa do slider
         pygame.draw.circle(screen, (255, 0, 0), (slider_rect.x + slider_pos, slider_rect.centery), 10)  # Controle
-        speed_text = f"Speed: {200 - slider_pos}"
+        speed_text = f"Speed: {speed}"
         speed_surface = font.render(speed_text, True, (255, 255, 255))
         screen.blit(speed_surface, (slider_rect.x + 220, slider_rect.y))
 
@@ -232,7 +246,7 @@ def run_GameOfLifeModel(
     model = GameOfLifeModel( # Instancia o modelo do jogo.
         width, height, revive_probabilities, survival_probabilities, alive_fraction, lamb, age_death
     ) 
-    clear_button_rect, random_button_rect = setup_buttons(cell_size, height) # Configuração dos botões.
+    clear_button_rect, random_button_rect, exit_button_rect = setup_buttons(cell_size, height) # Configuração dos botões.
     slider_rect, slider_pos = setup_slider(cell_size, height) # Configuração do slider.
     font = pygame.font.SysFont(None, 24) # Fonte usada nos textos.
     running, paused, dragging_slider = True, False, False # Estados iniciais do jogo.
@@ -242,16 +256,16 @@ def run_GameOfLifeModel(
     while running:
         running, paused, dragging_slider, slider_pos = handle_events(
         model, width, height, cell_size, clear_button_rect,
-        random_button_rect, slider_rect, paused, dragging_slider, slider_pos
+        random_button_rect, exit_button_rect, slider_rect, paused, dragging_slider, slider_pos
         )
 
         mouse_pos = pygame.mouse.get_pos()
-        paused = update_model(paused, slider_pos, clock)
+        speed, paused = update_model(paused, slider_pos, clock)
 
         # Renderização
         render_game(screen, model, cell_size, width, height, empty_color)
-        render_buttons(screen, font, mouse_pos, clear_button_rect, random_button_rect, button_color, button_hover_color)
-        render_slider(screen, font, slider_rect, slider_pos)
+        render_buttons(screen, font, mouse_pos, clear_button_rect, random_button_rect, exit_button_rect, button_color, button_hover_color)
+        render_slider(screen, font, slider_rect, slider_pos, speed)
         render_status(screen, font, width, cell_size, paused)
         max_age = render_model_info(screen, font, model, max_age)
         pygame.display.flip()  # Atualiza a tela
