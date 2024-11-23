@@ -36,7 +36,7 @@ def generate_game_pattern(starting_positions, grid_size=(10, 10), steps=10):
         grid = conway_game_of_life_step(grid)
     return ''.join(map(str, grid.flatten()))
 
-# Função para criar o mapeamento de caracteres para padrões do Jogo da Vida. Para este trabalho, usamos apenas padrões predefinidos, porém o código pode ser fácilmente extendido para gerar naturalmente padrões aleatórios para cada caractere.
+# Função para criar o mapeamento de caracteres para padrões do Jogo da Vida. Para este trabalho, usamos apenas padrões predefinidos, porém o código pode ser extendido para gerar naturalmente padrões aleatórios para cada caractere.
 def create_mapping(characters, steps=10, grid_size=(10, 10)):
     mapping = {}
     for char in characters: 
